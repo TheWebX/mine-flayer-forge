@@ -6,44 +6,23 @@ const collectBlock = require('mineflayer-collectblock');
 const tool = require('mineflayer-tool');
 const { Vec3 } = require('vec3');
 
-// Import our custom AI gunner class
+// Import our custom classes
 const AIGunner = require('./ai-gunner');
+const ConfigLoader = require('./config-loader');
 
-// Configuration
-const config = {
-  host: process.env.MINECRAFT_HOST || 'localhost',
-  port: process.env.MINECRAFT_PORT || 25565,
-  username: process.env.MINECRAFT_USERNAME || 'AIGunner',
-  password: process.env.MINECRAFT_PASSWORD || '',
-  version: process.env.MINECRAFT_VERSION || '1.20.1',
-  auth: process.env.MINECRAFT_AUTH || 'offline', // 'offline' or 'microsoft'
-  
-  // AI Gunner specific settings
-  aiSettings: {
-    searchRadius: 50, // Radius to search for guns and hostile mobs
-    attackRange: 32,  // Maximum attack range
-    gunPickupPriority: ['bow', 'crossbow', 'trident', 'snowball', 'egg', 'ender_pearl'],
-    hostileMobs: [
-      'zombie', 'skeleton', 'creeper', 'spider', 'cave_spider',
-      'enderman', 'witch', 'blaze', 'ghast', 'magma_cube',
-      'slime', 'zombie_pigman', 'piglin', 'hoglin', 'zoglin',
-      'wither_skeleton', 'phantom', 'drowned', 'husk', 'stray',
-      'vex', 'evoker', 'vindicator', 'pillager', 'ravager'
-    ],
-    autoEat: true,
-    autoHeal: true,
-    combatMode: true
-  }
-};
+// Load configuration
+const configLoader = new ConfigLoader();
+const serverConfig = configLoader.getServerConfig();
+const aiSettings = configLoader.getAIConfig();
 
 // Create bot instance
 const bot = mineflayer.createBot({
-  host: config.host,
-  port: config.port,
-  username: config.username,
-  password: config.password,
-  version: config.version,
-  auth: config.auth
+  host: serverConfig.host,
+  port: serverConfig.port,
+  username: serverConfig.username,
+  password: serverConfig.password,
+  version: serverConfig.version,
+  auth: serverConfig.auth
 });
 
 // Load plugins
@@ -54,7 +33,7 @@ bot.loadPlugin(collectBlock);
 bot.loadPlugin(tool);
 
 // Initialize AI Gunner
-const aiGunner = new AIGunner(bot, config.aiSettings);
+const aiGunner = new AIGunner(bot, aiSettings);
 
 // Bot event handlers
 bot.on('spawn', () => {
@@ -73,7 +52,7 @@ bot.on('chat', (username, message) => {
 });
 
 bot.on('health', () => {
-  if (bot.health < 20 && config.aiSettings.autoHeal) {
+  if (bot.health < 20 && aiSettings.autoHeal) {
     aiGunner.handleLowHealth();
   }
 });
@@ -99,4 +78,4 @@ process.on('SIGINT', () => {
 });
 
 console.log(`[${bot.username}] Starting AI Gunner...`);
-console.log(`[${bot.username}] Connecting to ${config.host}:${config.port}`);
+console.log(`[${bot.username}] Connecting to ${serverConfig.host}:${serverConfig.port}`);

@@ -1,0 +1,57 @@
+{
+  "server": {
+    "host": "localhost",
+    "port": 25565,
+    "username": "AIGunner",
+    "password": "",
+    "version": "1.20.1",
+    "auth": "offline"
+  },
+  "ai": {
+    "searchRadius": 50,
+    "attackRange": 32,
+    "gunPickupPriority": [
+      "bow",
+      "crossbow", 
+      "trident",
+      "snowball",
+      "egg",
+      "ender_pearl",
+      "arrow",
+      "spectral_arrow",
+      "tipped_arrow",
+      "firework_rocket"
+    ],
+    "hostileMobs": [
+      "zombie",
+      "skeleton", 
+      "creeper",
+      "spider",
+      "cave_spider",
+      "enderman",
+      "witch",
+      "blaze",
+      "ghast",
+      "magma_cube",
+      "slime",
+      "zombie_pigman",
+      "piglin",
+      "hoglin",
+      "zoglin",
+      "wither_skeleton",
+      "phantom",
+      "drowned",
+      "husk",
+      "stray",
+      "vex",
+      "evoker",
+      "vindicator",
+      "pillager",
+      "ravager"
+    ],
+    "autoEat": true,
+    "autoHeal": true,
+    "combatMode": true,
+    "attackCooldown": 1000
+  }
+}
