@@ -30,6 +30,12 @@ The AI will automatically target and attack:
 - Phantoms, Drowned, Husks, Strays
 - Vex, Evokers, Vindicators, Pillagers, Ravagers
 
+## Prerequisites
+
+- **Node.js**: Version 16.x or 18.x (tested with 18.17.0)
+- **Minecraft Forge Server**: Version 1.20.1 or compatible
+- **Java**: Version 17 or higher (for Minecraft Forge)
+
 ## Installation
 
 1. **Clone the repository**:
@@ -51,6 +57,15 @@ The AI will automatically target and attack:
    ```bash
    npm start
    ```
+
+### Quick Setup
+
+Use the provided installation script:
+
+```bash
+chmod +x scripts/install.sh
+./scripts/install.sh
+```
 
 ## Configuration
 
@@ -212,6 +227,16 @@ Adjust combat behavior:
    - Verify weapon names in config
    - Ensure items are within reach
 
+4. **Node.js Version Issues**:
+   - Ensure you're using Node.js 16.x or 18.x
+   - The project uses Mineflayer v3.11.2 for compatibility
+   - Avoid Node.js 22+ as it may cause compatibility issues
+
+5. **Security Vulnerabilities**:
+   - All known vulnerabilities have been patched
+   - The project uses overrides to ensure secure dependency versions
+   - Run `npm audit` to verify no vulnerabilities exist
+
 ### Debug Mode
 
 Enable debug logging by setting environment variable:
@@ -248,6 +273,22 @@ npm run dev
 ```
 
 This will restart the AI automatically when files change.
+
+## Security
+
+This project has been audited and all known security vulnerabilities have been addressed:
+
+- ✅ **Axios vulnerabilities**: Fixed by overriding to secure version (>=1.6.0)
+- ✅ **Dependency vulnerabilities**: All transitive dependencies updated
+- ✅ **Node.js compatibility**: Tested with Node.js 16.x and 18.x
+- ✅ **Regular audits**: Run `npm audit` to check for new vulnerabilities
+
+### Security Features
+
+- No hardcoded credentials
+- Environment variable configuration
+- Secure dependency overrides
+- Regular security updates
 
 ## License
 

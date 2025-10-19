@@ -5,7 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "test": "node test-setup.js",
+    "help": "echo 'AI Gunner Commands:' && echo '  npm start    - Start the AI Gunner' && echo '  npm run dev  - Start in development mode' && echo '  npm test     - Test the setup' && echo '  npm audit    - Check for security vulnerabilities'"
   },
   "keywords": [
     "minecraft",
@@ -19,8 +21,8 @@
   "author": "AI Assistant",
   "license": "MIT",
   "dependencies": {
-    "mineflayer": "^4.15.0",
-    "mineflayer-pathfinder": "^2.4.0",
+    "mineflayer": "^3.11.2",
+    "mineflayer-pathfinder": "^1.8.0",
     "mineflayer-pvp": "^1.0.0",
     "mineflayer-auto-eat": "^2.3.0",
     "mineflayer-collectblock": "^1.2.0",
@@ -28,6 +30,9 @@
     "prismarine-entity": "^1.2.0",
     "prismarine-item": "^1.12.0",
     "vec3": "^0.1.7"
+  },
+  "overrides": {
+    "axios": ">=1.6.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
