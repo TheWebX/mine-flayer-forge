@@ -5,6 +5,7 @@ const mineflayer = require('mineflayer');
 const AIGunner = require('./src/ai-gunner');
 const ConfigLoader = require('./src/config-loader');
 const ErrorHandler = require('./src/error-handler');
+const PluginLoader = require('./src/plugin-loader');
 
 console.log('🤖 Starting AI Gunner with enhanced error handling...\n');
 
@@ -57,27 +58,8 @@ try {
   process.exit(1);
 }
 
-// Load plugins
-console.log('Loading plugins...');
-try {
-  const { pathfinder } = require('mineflayer-pathfinder');
-  const pvp = require('mineflayer-pvp');
-  const autoEat = require('mineflayer-auto-eat');
-  const collectBlock = require('mineflayer-collectblock');
-  const tool = require('mineflayer-tool');
-  
-  bot.loadPlugin(pathfinder);
-  if (pvp.plugin) {
-    bot.loadPlugin(pvp.plugin);
-  }
-  bot.loadPlugin(autoEat);
-  bot.loadPlugin(collectBlock);
-  bot.loadPlugin(tool);
-  console.log('✅ Plugins loaded successfully\n');
-} catch (error) {
-  console.error('⚠️  Some plugins failed to load:', error.message);
-  console.log('Continuing with available plugins...\n');
-}
+// Load plugins using the plugin loader
+PluginLoader.loadPluginsWithLogging(bot);
 
 // Initialize AI Gunner
 let aiGunner;

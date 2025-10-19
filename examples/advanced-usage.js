@@ -1,6 +1,7 @@
 const mineflayer = require('mineflayer');
 const AIGunner = require('../src/ai-gunner');
 const ConfigLoader = require('../src/config-loader');
+const PluginLoader = require('../src/plugin-loader');
 
 // Advanced usage example with custom configuration
 class AdvancedAIGunner {
@@ -30,12 +31,8 @@ class AdvancedAIGunner {
       keepAlive: true
     });
 
-    // Load plugins
-    this.bot.loadPlugin(require('mineflayer-pathfinder').pathfinder);
-    this.bot.loadPlugin(require('mineflayer-pvp'));
-    this.bot.loadPlugin(require('mineflayer-auto-eat'));
-    this.bot.loadPlugin(require('mineflayer-collectblock'));
-    this.bot.loadPlugin(require('mineflayer-tool'));
+    // Load plugins using the plugin loader
+    PluginLoader.loadPluginsWithLogging(this.bot);
 
     // Initialize AI Gunner
     this.aiGunner = new AIGunner(this.bot, aiSettings);
@@ -165,13 +162,18 @@ class AdvancedAIGunner {
   }
 }
 
-// Usage
-const advancedAI = new AdvancedAIGunner();
-advancedAI.start();
+// Export the class for use in other files
+module.exports = AdvancedAIGunner;
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('Shutting down Advanced AI Gunner...');
-  advancedAI.shutdown();
-  process.exit(0);
-});
+// Usage (only run if this file is executed directly)
+if (require.main === module) {
+  const advancedAI = new AdvancedAIGunner();
+  advancedAI.start();
+
+  // Graceful shutdown
+  process.on('SIGINT', () => {
+    console.log('Shutting down Advanced AI Gunner...');
+    advancedAI.shutdown();
+    process.exit(0);
+  });
+}

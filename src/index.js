@@ -10,6 +10,7 @@ const { Vec3 } = require('vec3');
 const AIGunner = require('./ai-gunner');
 const ConfigLoader = require('./config-loader');
 const ErrorHandler = require('./error-handler');
+const PluginLoader = require('./plugin-loader');
 
 // Load configuration
 const configLoader = new ConfigLoader();
@@ -54,14 +55,8 @@ try {
   }
 }
 
-// Load plugins
-bot.loadPlugin(pathfinder);
-if (pvp.plugin) {
-  bot.loadPlugin(pvp.plugin);
-}
-bot.loadPlugin(autoEat);
-bot.loadPlugin(collectBlock);
-bot.loadPlugin(tool);
+// Load plugins using the plugin loader
+PluginLoader.loadPluginsWithLogging(bot);
 
 // Initialize AI Gunner
 const aiGunner = new AIGunner(bot, aiSettings);
