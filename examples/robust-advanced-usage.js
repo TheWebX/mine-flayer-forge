@@ -3,6 +3,7 @@ const AIGunner = require('../src/ai-gunner');
 const ConfigLoader = require('../src/config-loader');
 const PluginLoader = require('../src/plugin-loader');
 const VersionDetector = require('../src/version-detector');
+const ForgeHandler = require('../src/forge-handler');
 
 // Robust advanced usage example with better error handling
 class RobustAdvancedAIGunner {
@@ -59,7 +60,7 @@ class RobustAdvancedAIGunner {
         username: serverConfig.username,
         password: serverConfig.password,
         auth: serverConfig.auth,
-        version: '1.19.3', // Fallback version
+        version: '1.20.1', // Fallback version
         hideErrors: false,
         checkTimeoutInterval: 60000,
         keepAlive: true
