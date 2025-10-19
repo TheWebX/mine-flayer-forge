@@ -1,0 +1,274 @@
+const mineflayer = require('mineflayer');
+const AIGunner = require('../src/ai-gunner');
+const ConfigLoader = require('../src/config-loader');
+const PluginLoader = require('../src/plugin-loader');
+const VersionDetector = require('../src/version-detector');
+const ForgeHandler = require('../src/forge-handler');
+
+// Robust advanced usage example with better error handling
+class RobustAdvancedAIGunner {
+  constructor() {
+    this.configLoader = new ConfigLoader();
+    this.bot = null;
+    this.aiGunner = null;
+    this.connectionTimeout = null;
+    this.retryCount = 0;
+    this.maxRetries = 3;
+  }
+
+  async start() {
+    // Load configuration
+    const serverConfig = this.configLoader.getServerConfig();
+    const aiSettings = this.configLoader.getAIConfig();
+
+    console.log('🚀 Starting Robust Advanced AI Gunner...');
+    console.log(`📡 Server: ${serverConfig.host}:${serverConfig.port}`);
+    console.log(`👤 Username: ${serverConfig.username}`);
+
+    // Add connection timeout
+    this.connectionTimeout = setTimeout(() => {
+      console.error('⏰ Connection timeout. Server may not be responding.');
+      console.error('🔍 Troubleshooting:');
+      console.error('   1. Check if the server is running');
+      console.error('   2. Verify the host and port are correct');
+      console.error('   3. Try specifying a version in config.json');
+      this.retryConnection();
+    }, 15000); // 15 second timeout
+
+    try {
+      await this.createBot(serverConfig);
+      this.setupEventHandlers(aiSettings);
+      console.log('✅ Bot created and configured successfully');
+    } catch (error) {
+      console.error('❌ Failed to create bot:', error.message);
+      this.retryConnection();
+    }
+  }
+
+  async createBot(serverConfig) {
+    try {
+      // Use version detection to create bot
+      const botOptions = await VersionDetector.createBotWithVersionDetection(serverConfig);
+      this.bot = mineflayer.createBot(botOptions);
+      return this.bot;
+    } catch (error) {
+      console.error('Version detection failed, using fallback:', error.message);
+      // Fallback to basic bot creation
+      const botOptions = {
+        host: serverConfig.host,
+        port: serverConfig.port,
+        username: serverConfig.username,
+        password: serverConfig.password,
+        auth: serverConfig.auth,
+        version: '1.20.1', // Fallback version
+        hideErrors: false,
+        checkTimeoutInterval: 60000,
+        keepAlive: true
+      };
+      this.bot = mineflayer.createBot(botOptions);
+      return this.bot;
+    }
+  }
+
+  setupEventHandlers(aiSettings) {
+    // Load plugins using the plugin loader
+    PluginLoader.loadPluginsWithLogging(this.bot);
+
+    // Initialize AI Gunner
+    this.aiGunner = new AIGunner(this.bot, aiSettings);
+
+    this.bot.on('login', () => {
+      console.log(`🔐 [${this.bot.username}] Logged in successfully`);
+      if (this.connectionTimeout) {
+        clearTimeout(this.connectionTimeout);
+        this.connectionTimeout = null;
+      }
+      this.retryCount = 0; // Reset retry count on successful connection
+    });
+
+    this.bot.on('spawn', () => {
+      console.log(`🎮 [${this.bot.username}] Spawned in world`);
+      try {
+        this.aiGunner.initialize();
+        console.log('🤖 AI Gunner is now active!');
+        console.log('💬 Use chat commands: !start, !stop, !status, !help');
+      } catch (error) {
+        console.error('❌ Failed to initialize AI Gunner:', error.message);
+      }
+    });
+
+    this.bot.on('chat', (username, message) => {
+      if (username === this.bot.username) return;
+      
+      if (message.startsWith('!')) {
+        const command = message.slice(1).toLowerCase();
+        try {
+          this.handleAdvancedCommand(command, username);
+        } catch (error) {
+          console.error('❌ Command error:', error.message);
+        }
+      }
+    });
+
+    this.bot.on('health', () => {
+      if (this.bot.health < 20 && aiSettings.autoHeal) {
+        console.log(`❤️  [${this.bot.username}] Health: ${this.bot.health}/20`);
+        try {
+          this.aiGunner.handleLowHealth();
+        } catch (error) {
+          console.error('❌ Health handling error:', error.message);
+        }
+      }
+    });
+
+    this.bot.on('death', () => {
+      console.log(`💀 [${this.bot.username}] Died! Respawning...`);
+      if (this.aiGunner) {
+        this.aiGunner.shutdown();
+      }
+      
+      // Restart AI after respawn
+      setTimeout(() => {
+        if (this.aiGunner) {
+          this.aiGunner.initialize();
+        }
+      }, 5000);
+    });
+
+    this.bot.on('error', (err) => {
+      console.error(`❌ [${this.bot.username}] Error:`, err.message);
+      
+      // Handle specific errors
+      if (err.message && err.message.includes('version')) {
+        console.error('🔧 Version Error Solutions:');
+        console.error('   1. Add "version": "1.20.1" to config.json');
+        console.error('   2. Check if server is running the expected version');
+        console.error('   3. Try different versions: 1.19.4, 1.20.1, 1.20.4');
+      } else if (err.message && err.message.includes('ECONNREFUSED')) {
+        console.error('🔌 Connection Error:');
+        console.error('   1. Check if the server is running');
+        console.error('   2. Verify host and port are correct');
+        console.error('   3. Check firewall settings');
+      }
+      
+      this.retryConnection();
+    });
+
+    this.bot.on('kicked', (reason) => {
+      if (ForgeHandler.isForgeServer(reason)) {
+        console.log('🔧 Forge server detected - this is normal for modded servers');
+        console.log('💡 The bot will work with vanilla Minecraft servers');
+        console.log('💡 For Forge servers, you may need to use a different approach');
+        console.log(ForgeHandler.getForgeCompatibilityMessage());
+        // Don't retry for Forge servers as it won't work
+        process.exit(0);
+      } else {
+        console.error(`🚫 [${this.bot.username}] Kicked:`, reason);
+        this.retryConnection();
+      }
+    });
+
+    this.bot.on('end', () => {
+      console.log(`👋 [${this.bot.username}] Disconnected`);
+    });
+
+    // Advanced features
+    this.bot.on('entitySpawn', (entity) => {
+      if (entity.type === 'mob' && this.isHostileMob(entity.name)) {
+        console.log(`👹 Hostile mob spawned: ${entity.name}`);
+      }
+    });
+
+    this.bot.on('itemDrop', (item) => {
+      if (this.isGunItem(item.name)) {
+        console.log(`🔫 Gun item dropped: ${item.name}`);
+      }
+    });
+  }
+
+  retryConnection() {
+    if (this.retryCount >= this.maxRetries) {
+      console.error('❌ Max retries reached. Giving up.');
+      process.exit(1);
+    }
+
+    this.retryCount++;
+    console.log(`🔄 Retrying connection (${this.retryCount}/${this.maxRetries})...`);
+    
+    setTimeout(() => {
+      if (this.bot) {
+        this.bot.quit();
+      }
+      this.start();
+    }, 5000 * this.retryCount); // Exponential backoff
+  }
+
+  handleAdvancedCommand(command, username) {
+    switch (command) {
+      case 'config':
+        this.bot.chat(`Search Radius: ${this.aiGunner.settings.searchRadius}`);
+        this.bot.chat(`Attack Range: ${this.aiGunner.settings.attackRange}`);
+        break;
+      case 'weapons':
+        const weapons = this.bot.inventory.items().filter(item => 
+          this.aiGunner.isGunItem(item.name)
+        );
+        this.bot.chat(`Weapons: ${weapons.map(w => w.name).join(', ')}`);
+        break;
+      case 'mobs':
+        const nearbyMobs = this.bot.nearestEntity(entity => 
+          entity.type === 'mob' && this.aiGunner.hostileMobs.has(entity.name)
+        );
+        if (nearbyMobs) {
+          this.bot.chat(`Nearby hostile: ${nearbyMobs.name}`);
+        } else {
+          this.bot.chat('No hostile mobs nearby');
+        }
+        break;
+      case 'stats':
+        this.bot.chat(`Health: ${this.bot.health}/20`);
+        this.bot.chat(`Food: ${this.bot.food}/20`);
+        this.bot.chat(`Position: ${this.bot.entity.position.toString()}`);
+        break;
+      default:
+        // Fall back to basic commands
+        this.aiGunner.handleCommand(command, username);
+    }
+  }
+
+  isHostileMob(mobName) {
+    return this.aiGunner && this.aiGunner.hostileMobs.has(mobName);
+  }
+
+  isGunItem(itemName) {
+    return this.aiGunner && this.aiGunner.isGunItem(itemName);
+  }
+
+  shutdown() {
+    if (this.connectionTimeout) {
+      clearTimeout(this.connectionTimeout);
+    }
+    if (this.aiGunner) {
+      this.aiGunner.shutdown();
+    }
+    if (this.bot) {
+      this.bot.quit();
+    }
+  }
+}
+
+// Export the class for use in other files
+module.exports = RobustAdvancedAIGunner;
+
+// Usage (only run if this file is executed directly)
+if (require.main === module) {
+  const robustAI = new RobustAdvancedAIGunner();
+  robustAI.start();
+
+  // Graceful shutdown
+  process.on('SIGINT', () => {
+    console.log('🛑 Shutting down Robust Advanced AI Gunner...');
+    robustAI.shutdown();
+    process.exit(0);
+  });
+}

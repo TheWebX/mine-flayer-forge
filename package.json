@@ -1,0 +1,42 @@
+{
+  "name": "mineflayer-ai-gunner",
+  "version": "1.0.0",
+  "description": "AI player for Minecraft Forge that picks up guns and shoots hostile mobs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node start-ai.js",
+    "start:basic": "node src/index.js",
+    "dev": "nodemon start-ai.js",
+    "test": "node test-setup.js",
+    "help": "echo 'AI Gunner Commands:' && echo '  npm start       - Start the AI Gunner (enhanced)' && echo '  npm run start:basic - Start with basic error handling' && echo '  npm run dev     - Start in development mode' && echo '  npm test        - Test the setup' && echo '  npm audit       - Check for security vulnerabilities'"
+  },
+  "keywords": [
+    "minecraft",
+    "mineflayer",
+    "ai",
+    "bot",
+    "forge",
+    "gun",
+    "combat"
+  ],
+  "author": "AI Assistant",
+  "license": "MIT",
+  "dependencies": {
+    "minecraft-protocol-forge": "github:PrismarineJS/node-minecraft-protocol-forge",
+    "mineflayer": "^4.15.0",
+    "mineflayer-auto-eat": "^2.3.0",
+    "mineflayer-collectblock": "^1.2.0",
+    "mineflayer-pathfinder": "^2.4.0",
+    "mineflayer-pvp": "^1.0.0",
+    "mineflayer-tool": "^1.0.0",
+    "prismarine-entity": "^1.2.0",
+    "prismarine-item": "^1.12.0",
+    "vec3": "^0.1.7"
+  },
+  "overrides": {
+    "axios": ">=1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
