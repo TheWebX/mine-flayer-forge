@@ -155,8 +155,17 @@ class RobustAdvancedAIGunner {
     });
 
     this.bot.on('kicked', (reason) => {
-      console.error(`🚫 [${this.bot.username}] Kicked:`, reason);
-      this.retryConnection();
+      if (ForgeHandler.isForgeServer(reason)) {
+        console.log('🔧 Forge server detected - this is normal for modded servers');
+        console.log('💡 The bot will work with vanilla Minecraft servers');
+        console.log('💡 For Forge servers, you may need to use a different approach');
+        console.log(ForgeHandler.getForgeCompatibilityMessage());
+        // Don't retry for Forge servers as it won't work
+        process.exit(0);
+      } else {
+        console.error(`🚫 [${this.bot.username}] Kicked:`, reason);
+        this.retryConnection();
+      }
     });
 
     this.bot.on('end', () => {
