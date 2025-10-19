@@ -60,6 +60,11 @@ class AdvancedAIGunner {
   }
 
   setupEventHandlers() {
+    this.bot.on('login', () => {
+      console.log(`[${this.bot.username}] Logged in successfully`);
+      clearTimeout(connectionTimeout);
+    });
+
     this.bot.on('spawn', () => {
       console.log(`[${this.bot.username}] Spawned in world`);
       this.aiGunner.initialize();
