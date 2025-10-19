@@ -16,20 +16,36 @@ class AdvancedAIGunner {
     const serverConfig = this.configLoader.getServerConfig();
     const aiSettings = this.configLoader.getAIConfig();
 
+    // Add connection timeout
+    const connectionTimeout = setTimeout(() => {
+      console.error('Connection timeout. Server may not be responding.');
+      console.error('Check if the server is running and accessible.');
+      process.exit(1);
+    }, 10000); // 10 second timeout
+
     // Create bot with custom settings
-    this.bot = mineflayer.createBot({
+    const botOptions = {
       host: serverConfig.host,
       port: serverConfig.port,
       username: serverConfig.username,
       password: serverConfig.password,
-      version: serverConfig.version,
       auth: serverConfig.auth,
       
       // Additional bot options
       hideErrors: false,
       checkTimeoutInterval: 60000,
       keepAlive: true
-    });
+    };
+
+    // Only add version if it's valid and not auto-detect
+    if (serverConfig.version && 
+        serverConfig.version !== 'auto' && 
+        typeof serverConfig.version === 'string' &&
+        serverConfig.version.match(/^\d+\.\d+(\.\d+)?$/)) {
+      botOptions.version = serverConfig.version;
+    }
+
+    this.bot = mineflayer.createBot(botOptions);
 
     // Load plugins using the plugin loader
     PluginLoader.loadPluginsWithLogging(this.bot);
@@ -81,6 +97,15 @@ class AdvancedAIGunner {
 
     this.bot.on('error', (err) => {
       console.error(`[${this.bot.username}] Error:`, err);
+      
+      // Handle version detection errors
+      if (err.message && err.message.includes('version')) {
+        console.error('Version detection error. This may be due to:');
+        console.error('1. Server not responding to version ping');
+        console.error('2. Server running on different Minecraft version');
+        console.error('3. Server not accessible or not running');
+        console.error('Try specifying a version in config.json (e.g., "1.20.1")');
+      }
     });
 
     this.bot.on('kicked', (reason) => {
