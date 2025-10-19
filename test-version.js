@@ -1,0 +1,177 @@
+#!/usr/bin/env node
+
+// Test different Minecraft versions to find one that works
+const mineflayer = require('mineflayer');
+
+const versions = [
+  '1.20.1',
+  '1.20.4', 
+  '1.19.4',
+  '1.19.3',
+  '1.19.2',
+  '1.19.1',
+  '1.19',
+  '1.18.2',
+  '1.18.1',
+  '1.18',
+  '1.17.1',
+  '1.17',
+  '1.16.5',
+  '1.16.4',
+  '1.16.3',
+  '1.16.2',
+  '1.16.1',
+  '1.16',
+  '1.15.2',
+  '1.15.1',
+  '1.15',
+  '1.14.4',
+  '1.14.3',
+  '1.14.2',
+  '1.14.1',
+  '1.14',
+  '1.13.2',
+  '1.13.1',
+  '1.13',
+  '1.12.2',
+  '1.12.1',
+  '1.12',
+  '1.11.2',
+  '1.11.1',
+  '1.11',
+  '1.10.2',
+  '1.10.1',
+  '1.10',
+  '1.9.4',
+  '1.9.3',
+  '1.9.2',
+  '1.9.1',
+  '1.9',
+  '1.8.9',
+  '1.8.8',
+  '1.8.7',
+  '1.8.6',
+  '1.8.5',
+  '1.8.4',
+  '1.8.3',
+  '1.8.2',
+  '1.8.1',
+  '1.8',
+  '1.7.10',
+  '1.7.9',
+  '1.7.8',
+  '1.7.7',
+  '1.7.6',
+  '1.7.5',
+  '1.7.4',
+  '1.7.3',
+  '1.7.2',
+  '1.7.1',
+  '1.7',
+  '1.6.4',
+  '1.6.2',
+  '1.6.1',
+  '1.6',
+  '1.5.2',
+  '1.5.1',
+  '1.5',
+  '1.4.7',
+  '1.4.6',
+  '1.4.5',
+  '1.4.4',
+  '1.4.3',
+  '1.4.2',
+  '1.4.1',
+  '1.4',
+  '1.3.2',
+  '1.3.1',
+  '1.3',
+  '1.2.5',
+  '1.2.4',
+  '1.2.3',
+  '1.2.2',
+  '1.2.1',
+  '1.2',
+  '1.1',
+  '1.0.0'
+];
+
+console.log('🧪 Testing Minecraft versions...\n');
+
+let workingVersion = null;
+
+async function testVersion(version) {
+  return new Promise((resolve) => {
+    try {
+      const bot = mineflayer.createBot({
+        host: 'localhost',
+        port: 25565,
+        username: 'TestBot',
+        version: version,
+        auth: 'offline',
+        hideErrors: true
+      });
+
+      let resolved = false;
+
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          bot.quit();
+          resolve({ version, success: false, error: 'timeout' });
+        }
+      }, 2000);
+
+      bot.on('error', (err) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          bot.quit();
+          resolve({ version, success: false, error: err.message });
+        }
+      });
+
+      bot.on('login', () => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          bot.quit();
+          resolve({ version, success: true, error: null });
+        }
+      });
+
+    } catch (error) {
+      resolve({ version, success: false, error: error.message });
+    }
+  });
+}
+
+async function runTests() {
+  for (const version of versions) {
+    process.stdout.write(`Testing ${version}... `);
+    const result = await testVersion(version);
+    
+    if (result.success) {
+      console.log('✅ WORKS');
+      if (!workingVersion) {
+        workingVersion = version;
+      }
+    } else {
+      console.log(`❌ ${result.error.substring(0, 50)}...`);
+    }
+    
+    // Small delay between tests
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  console.log('\n🎉 Testing complete!');
+  if (workingVersion) {
+    console.log(`✅ Working version found: ${workingVersion}`);
+    console.log('💡 Update your config.json to use this version');
+  } else {
+    console.log('❌ No working versions found');
+    console.log('💡 This may be due to server not running or network issues');
+  }
+}
+
+runTests().catch(console.error);

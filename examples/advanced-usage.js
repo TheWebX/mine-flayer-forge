@@ -2,6 +2,7 @@ const mineflayer = require('mineflayer');
 const AIGunner = require('../src/ai-gunner');
 const ConfigLoader = require('../src/config-loader');
 const PluginLoader = require('../src/plugin-loader');
+const VersionDetector = require('../src/version-detector');
 
 // Advanced usage example with custom configuration
 class AdvancedAIGunner {
@@ -23,29 +24,26 @@ class AdvancedAIGunner {
       process.exit(1);
     }, 10000); // 10 second timeout
 
-    // Create bot with custom settings
-    const botOptions = {
-      host: serverConfig.host,
-      port: serverConfig.port,
-      username: serverConfig.username,
-      password: serverConfig.password,
-      auth: serverConfig.auth,
-      
-      // Additional bot options
-      hideErrors: false,
-      checkTimeoutInterval: 60000,
-      keepAlive: true
-    };
-
-    // Only add version if it's valid and not auto-detect
-    if (serverConfig.version && 
-        serverConfig.version !== 'auto' && 
-        typeof serverConfig.version === 'string' &&
-        serverConfig.version.match(/^\d+\.\d+(\.\d+)?$/)) {
-      botOptions.version = serverConfig.version;
+    // Use version detection to create bot
+    try {
+      const botOptions = await VersionDetector.createBotWithVersionDetection(serverConfig);
+      this.bot = mineflayer.createBot(botOptions);
+    } catch (error) {
+      console.error('Version detection failed, using fallback:', error.message);
+      // Fallback to basic bot creation
+      const botOptions = {
+        host: serverConfig.host,
+        port: serverConfig.port,
+        username: serverConfig.username,
+        password: serverConfig.password,
+        auth: serverConfig.auth,
+        version: '1.19.3', // Fallback version
+        hideErrors: false,
+        checkTimeoutInterval: 60000,
+        keepAlive: true
+      };
+      this.bot = mineflayer.createBot(botOptions);
     }
-
-    this.bot = mineflayer.createBot(botOptions);
 
     // Load plugins using the plugin loader
     PluginLoader.loadPluginsWithLogging(this.bot);
@@ -109,7 +107,7 @@ class AdvancedAIGunner {
         console.error('1. Server not responding to version ping');
         console.error('2. Server running on different Minecraft version');
         console.error('3. Server not accessible or not running');
-        console.error('Try specifying a version in config.json (e.g., "1.20.1")');
+        console.error('Try specifying a version in config.json (e.g., "1.19.3", "1.20.1")');
       }
     });
 

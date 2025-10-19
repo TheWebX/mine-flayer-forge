@@ -2,17 +2,13 @@ const mineflayer = require('mineflayer');
 const AIGunner = require('../src/ai-gunner');
 const ConfigLoader = require('../src/config-loader');
 const PluginLoader = require('../src/plugin-loader');
-const VersionDetector = require('../src/version-detector');
 
-// Robust advanced usage example with better error handling
-class RobustAdvancedAIGunner {
+// Simple advanced usage example that works reliably
+class SimpleAdvancedAIGunner {
   constructor() {
     this.configLoader = new ConfigLoader();
     this.bot = null;
     this.aiGunner = null;
-    this.connectionTimeout = null;
-    this.retryCount = 0;
-    this.maxRetries = 3;
   }
 
   async start() {
@@ -20,19 +16,9 @@ class RobustAdvancedAIGunner {
     const serverConfig = this.configLoader.getServerConfig();
     const aiSettings = this.configLoader.getAIConfig();
 
-    console.log('🚀 Starting Robust Advanced AI Gunner...');
+    console.log('🚀 Starting Simple Advanced AI Gunner...');
     console.log(`📡 Server: ${serverConfig.host}:${serverConfig.port}`);
     console.log(`👤 Username: ${serverConfig.username}`);
-
-    // Add connection timeout
-    this.connectionTimeout = setTimeout(() => {
-      console.error('⏰ Connection timeout. Server may not be responding.');
-      console.error('🔍 Troubleshooting:');
-      console.error('   1. Check if the server is running');
-      console.error('   2. Verify the host and port are correct');
-      console.error('   3. Try specifying a version in config.json');
-      this.retryConnection();
-    }, 15000); // 15 second timeout
 
     try {
       await this.createBot(serverConfig);
@@ -40,33 +26,30 @@ class RobustAdvancedAIGunner {
       console.log('✅ Bot created and configured successfully');
     } catch (error) {
       console.error('❌ Failed to create bot:', error.message);
-      this.retryConnection();
+      console.error('💡 Try specifying a version in config.json (e.g., "1.19.3")');
+      process.exit(1);
     }
   }
 
   async createBot(serverConfig) {
-    try {
-      // Use version detection to create bot
-      const botOptions = await VersionDetector.createBotWithVersionDetection(serverConfig);
-      this.bot = mineflayer.createBot(botOptions);
-      return this.bot;
-    } catch (error) {
-      console.error('Version detection failed, using fallback:', error.message);
-      // Fallback to basic bot creation
-      const botOptions = {
-        host: serverConfig.host,
-        port: serverConfig.port,
-        username: serverConfig.username,
-        password: serverConfig.password,
-        auth: serverConfig.auth,
-        version: '1.19.3', // Fallback version
-        hideErrors: false,
-        checkTimeoutInterval: 60000,
-        keepAlive: true
-      };
-      this.bot = mineflayer.createBot(botOptions);
-      return this.bot;
-    }
+    // Use a specific version to avoid auto-detection issues
+    const version = serverConfig.version || '1.19.3';
+    
+    const botOptions = {
+      host: serverConfig.host,
+      port: serverConfig.port,
+      username: serverConfig.username,
+      password: serverConfig.password,
+      auth: serverConfig.auth,
+      version: version,
+      hideErrors: false,
+      checkTimeoutInterval: 60000,
+      keepAlive: true
+    };
+
+    console.log(`🎮 Using Minecraft version: ${version}`);
+    this.bot = mineflayer.createBot(botOptions);
+    return this.bot;
   }
 
   setupEventHandlers(aiSettings) {
@@ -78,11 +61,6 @@ class RobustAdvancedAIGunner {
 
     this.bot.on('login', () => {
       console.log(`🔐 [${this.bot.username}] Logged in successfully`);
-      if (this.connectionTimeout) {
-        clearTimeout(this.connectionTimeout);
-        this.connectionTimeout = null;
-      }
-      this.retryCount = 0; // Reset retry count on successful connection
     });
 
     this.bot.on('spawn', () => {
@@ -140,22 +118,19 @@ class RobustAdvancedAIGunner {
       // Handle specific errors
       if (err.message && err.message.includes('version')) {
         console.error('🔧 Version Error Solutions:');
-        console.error('   1. Add "version": "1.20.1" to config.json');
+        console.error('   1. Add "version": "1.19.3" to config.json');
         console.error('   2. Check if server is running the expected version');
-        console.error('   3. Try different versions: 1.19.4, 1.20.1, 1.20.4');
+        console.error('   3. Try different versions: 1.19.3, 1.19.4, 1.20.1');
       } else if (err.message && err.message.includes('ECONNREFUSED')) {
         console.error('🔌 Connection Error:');
         console.error('   1. Check if the server is running');
         console.error('   2. Verify host and port are correct');
         console.error('   3. Check firewall settings');
       }
-      
-      this.retryConnection();
     });
 
     this.bot.on('kicked', (reason) => {
       console.error(`🚫 [${this.bot.username}] Kicked:`, reason);
-      this.retryConnection();
     });
 
     this.bot.on('end', () => {
@@ -174,23 +149,6 @@ class RobustAdvancedAIGunner {
         console.log(`🔫 Gun item dropped: ${item.name}`);
       }
     });
-  }
-
-  retryConnection() {
-    if (this.retryCount >= this.maxRetries) {
-      console.error('❌ Max retries reached. Giving up.');
-      process.exit(1);
-    }
-
-    this.retryCount++;
-    console.log(`🔄 Retrying connection (${this.retryCount}/${this.maxRetries})...`);
-    
-    setTimeout(() => {
-      if (this.bot) {
-        this.bot.quit();
-      }
-      this.start();
-    }, 5000 * this.retryCount); // Exponential backoff
   }
 
   handleAdvancedCommand(command, username) {
@@ -220,6 +178,9 @@ class RobustAdvancedAIGunner {
         this.bot.chat(`Food: ${this.bot.food}/20`);
         this.bot.chat(`Position: ${this.bot.entity.position.toString()}`);
         break;
+      case 'version':
+        this.bot.chat(`Minecraft version: ${this.bot.version}`);
+        break;
       default:
         // Fall back to basic commands
         this.aiGunner.handleCommand(command, username);
@@ -235,9 +196,6 @@ class RobustAdvancedAIGunner {
   }
 
   shutdown() {
-    if (this.connectionTimeout) {
-      clearTimeout(this.connectionTimeout);
-    }
     if (this.aiGunner) {
       this.aiGunner.shutdown();
     }
@@ -248,17 +206,17 @@ class RobustAdvancedAIGunner {
 }
 
 // Export the class for use in other files
-module.exports = RobustAdvancedAIGunner;
+module.exports = SimpleAdvancedAIGunner;
 
 // Usage (only run if this file is executed directly)
 if (require.main === module) {
-  const robustAI = new RobustAdvancedAIGunner();
-  robustAI.start();
+  const simpleAI = new SimpleAdvancedAIGunner();
+  simpleAI.start();
 
   // Graceful shutdown
   process.on('SIGINT', () => {
-    console.log('🛑 Shutting down Robust Advanced AI Gunner...');
-    robustAI.shutdown();
+    console.log('🛑 Shutting down Simple Advanced AI Gunner...');
+    simpleAI.shutdown();
     process.exit(0);
   });
 }

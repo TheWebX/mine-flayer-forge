@@ -6,7 +6,7 @@ class ErrorHandler {
     
     if (error.message.includes('version')) {
       console.error('Version Error: Invalid or unsupported Minecraft version');
-      console.error('Supported versions: 1.19.4, 1.20.1, 1.20.4');
+      console.error('Supported versions: 1.19.3, 1.19.4, 1.20.1, 1.20.4');
       console.error('Current version:', botOptions.version || 'auto-detect');
       console.error('Try changing the version in config.json');
     } else if (error.message.includes('connection')) {
