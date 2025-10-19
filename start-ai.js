@@ -67,14 +67,16 @@ try {
   const tool = require('mineflayer-tool');
   
   bot.loadPlugin(pathfinder);
-  bot.loadPlugin(pvp);
+  if (pvp.plugin) {
+    bot.loadPlugin(pvp.plugin);
+  }
   bot.loadPlugin(autoEat);
   bot.loadPlugin(collectBlock);
   bot.loadPlugin(tool);
   console.log('✅ Plugins loaded successfully\n');
 } catch (error) {
-  console.error('❌ Failed to load plugins:', error.message);
-  process.exit(1);
+  console.error('⚠️  Some plugins failed to load:', error.message);
+  console.log('Continuing with available plugins...\n');
 }
 
 // Initialize AI Gunner

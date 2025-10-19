@@ -56,7 +56,9 @@ try {
 
 // Load plugins
 bot.loadPlugin(pathfinder);
-bot.loadPlugin(pvp);
+if (pvp.plugin) {
+  bot.loadPlugin(pvp.plugin);
+}
 bot.loadPlugin(autoEat);
 bot.loadPlugin(collectBlock);
 bot.loadPlugin(tool);
