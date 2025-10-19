@@ -22,7 +22,7 @@ class ConfigLoader {
     return {
       server: {
         host: process.env.MINECRAFT_HOST || 'localhost',
-        port: parseInt(process.env.MINECRAFT_PORT) || 25565,
+        port: parseInt(process.env.MINECRAFT_PORT) || 53690,
         username: process.env.MINECRAFT_USERNAME || 'AIGunner',
         password: process.env.MINECRAFT_PASSWORD || '',
         version: process.env.MINECRAFT_VERSION || '1.20.1',

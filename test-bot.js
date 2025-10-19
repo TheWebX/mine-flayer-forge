@@ -7,7 +7,7 @@ console.log('🧪 Testing bot creation...');
 
 const botOptions = {
   host: 'localhost',
-  port: 25565,
+  port: 53690,
   username: 'TestBot',
   auth: 'offline',
   hideErrors: true

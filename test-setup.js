@@ -63,7 +63,7 @@ try {
   // Test that we can create a bot instance (without connecting)
   const bot = mineflayer.createBot({
     host: 'localhost',
-    port: 25565,
+    port: 53690,
     username: 'TestBot',
     version: '1.20.1',
     auth: 'offline',

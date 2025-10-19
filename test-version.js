@@ -105,7 +105,7 @@ async function testVersion(version) {
     try {
       const bot = mineflayer.createBot({
         host: 'localhost',
-        port: 25565,
+        port: 53690,
         username: 'TestBot',
         version: version,
         auth: 'offline',
