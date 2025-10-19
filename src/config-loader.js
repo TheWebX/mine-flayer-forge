@@ -25,7 +25,7 @@ class ConfigLoader {
         port: parseInt(process.env.MINECRAFT_PORT) || 25565,
         username: process.env.MINECRAFT_USERNAME || 'AIGunner',
         password: process.env.MINECRAFT_PASSWORD || '',
-        version: process.env.MINECRAFT_VERSION || '1.20.1',
+        version: process.env.MINECRAFT_VERSION || null,
         auth: process.env.MINECRAFT_AUTH || 'offline'
       },
       ai: {

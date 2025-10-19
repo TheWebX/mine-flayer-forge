@@ -4,7 +4,6 @@
     "port": 25565,
     "username": "AIGunner",
     "password": "",
-    "version": "1.20.1",
     "auth": "offline"
   },
   "ai": {
